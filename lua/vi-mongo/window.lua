@@ -31,7 +31,7 @@ local function create_vi_mongo_window()
 
     local win = api.nvim_open_win(buf, true, opts)
 
-    api.nvim_win_set_option(win, "winblend", 0)
+    api.nvim_set_option_value("winblend", 0, { win = win })
 
     vim.bo[buf].bufhidden = "wipe"
 
