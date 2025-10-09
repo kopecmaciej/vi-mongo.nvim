@@ -62,13 +62,15 @@ local function create_vi_mongo_window()
         buffer = buf,
         callback = function()
             vim.schedule(function()
-                api.nvim_win_close(win, true)
+                if api.nvim_win_is_valid(win) then
+                    api.nvim_win_close(win, true)
+                end
             end)
         end,
         once = true,
     })
 
-    fn.termopen("vi-mongo")
+    fn.jobstart("vi-mongo", { term = true })
 
     vim.cmd("startinsert")
 end
