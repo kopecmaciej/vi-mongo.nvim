@@ -1,16 +1,15 @@
 local api = vim.api
 local fn = vim.fn
 
-local M = {}
-M.config = { persist = false }
+local M = {
+    _buf = nil,
+    _win = nil,
+    config = {
+        persist = false,
+    },
+}
 
-local function create_vi_mongo_window()
-    if fn.executable("vi-mongo") ~= 1 then
-        api.nvim_err_writeln("Failed to start vi-mongo. Is it installed and in your PATH?")
-        return
-    end
-
-    local buf = api.nvim_create_buf(false, true)
+local function get_win_opts()
     local width = vim.o.columns
     local height = vim.o.lines
 
@@ -29,18 +28,41 @@ local function create_vi_mongo_window()
         col = col,
         border = "rounded",
     }
+    return opts
+end
+
+local function create_vi_mongo_window()
+    if fn.executable("vi-mongo") ~= 1 then
+        api.nvim_err_writeln("Failed to start vi-mongo. Is it installed and in your PATH?")
+        return
+    end
+
+    if M.config.persist and M._buf and api.nvim_buf_is_valid(M._buf) then
+        -- reopen existing buffer in a new window
+        local opts = get_win_opts()
+        M._win = api.nvim_open_win(M._buf, true, opts)
+        api.nvim_set_option_value("winblend", 0, { win = M._win })
+        vim.cmd("startinsert")
+        return
+    end
+
+    local buf = api.nvim_create_buf(false, true)
+    M._buf = buf
+    local opts = get_win_opts()
 
     local win = api.nvim_open_win(buf, true, opts)
+    M._win = win
 
     api.nvim_set_option_value("winblend", 0, { win = win })
 
+    print(M.config.persist)
     vim.bo[buf].bufhidden = M.config.persist and "hide" or "wipe"
 
     api.nvim_create_autocmd("TermClose", {
         buffer = buf,
         callback = function()
             vim.schedule(function()
-                api.nvim_win_close(0, true)
+                api.nvim_win_close(win, true)
             end)
         end,
         once = true,
