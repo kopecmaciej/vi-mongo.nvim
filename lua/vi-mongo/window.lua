@@ -2,6 +2,7 @@ local api = vim.api
 local fn = vim.fn
 
 local M = {}
+M.config = { persist = false }
 
 local function create_vi_mongo_window()
     if fn.executable("vi-mongo") ~= 1 then
@@ -33,7 +34,7 @@ local function create_vi_mongo_window()
 
     api.nvim_set_option_value("winblend", 0, { win = win })
 
-    vim.bo[buf].bufhidden = "wipe"
+    vim.bo[buf].bufhidden = M.config.persist and "hide" or "wipe"
 
     api.nvim_create_autocmd("TermClose", {
         buffer = buf,
@@ -51,7 +52,8 @@ local function create_vi_mongo_window()
 end
 
 function M.setup(opts)
-    vim.api.nvim_create_user_command("ViMongo", create_vi_mongo_window, {})
+    M.config = vim.tbl_extend("force", M.config, opts or {})
+    vim.api.nvim_create_user_command("ViMongo", create_vi_mongo_window, { nargs = 0 })
 end
 
 return M
