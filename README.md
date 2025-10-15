@@ -29,7 +29,10 @@ Add the following to your Neovim configuration:
 use {
     'kopecmaciej/vi-mongo.nvim',
     config = function()
-        require('vi-mongo').setup()
+        require('vi-mongo').setup({
+            -- Set to true to persist connection between float openings
+            persist = false
+        })
     end
 }
 ```
@@ -44,7 +47,9 @@ Add the following to your Neovim configuration:
 {
   "kopecmaciej/vi-mongo.nvim",
   config = function()
-    require("vi-mongo").setup()
+    require("vi-mongo").setup({
+            persist = false, -- default: false; set to true to persist the connection between float window sessions
+        })
   end,
   cmd = { "ViMongo" },
   keys = {
@@ -71,11 +76,15 @@ configuration:
 ```lua
 vim.api.nvim_set_keymap('n', '<leader>vm', ':ViMongo<CR>', { noremap = true, silent = true })
 ```
+```lua
+-- Extra: configure a keymap to close the floating terminal
+vim.api.nvim_set_keymap("t", "<C-\\>", ":TermClose<cr>", { noremap = true, silent = true, desc = "Hide Floating Terminal" })
+```
+
 
 This will map `<leader>vm` to open Vi Mongo in normal mode.
 
 ## Requirements
 
 - Neovim (0.5 or later)
-- `vi-mongo` CLI tool installed and available in your PATH (check [installation
-  instructions](https://vi-mongo.com/docs/installation))
+- `vi-mongo` CLI tool installed and available in your PATH (check [installation instructions](https://vi-mongo.com/docs/installation))
